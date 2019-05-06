@@ -2,14 +2,21 @@ import csv
 import re
 
 
+def is_not_blank(s):
+    return bool(s and s.strip())
+
+
 def csv_writer(data, file):
     with open(file, "w", newline='') as csv_file:
-        fieldnames = ['\ufeffname', 'group', 'code', 'parentCode', 'measureName', 'tax', 'allowToSell', 'description', 'articleNumber', 'type', 'price', 'costPrice', 'quantity', 'barCodes', 'alcoCodes', 'alcoholByVolume', 'alcoholProductKindCode', 'tareVolume']
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';')
+        fieldnames = ['external_id', 'phone', 'email']
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=',')
         writer.writeheader()
-        # pattern = re.compile("(Германия|Италия|Франция)")
         for row in data:
-            if "Австрия" in row['\ufeffname']:
+            if (is_not_blank(row.get('phone')) & (is_not_blank(row.get('email'))) & re.sub('\ |\+|\[|\]|\(|\)|\-', '', row.get('phone'))[0:11].isdigit()):
+                a = re.sub('\ |\+|\[|\]|\(|\)|\-', '', row.get('phone'))[0:11]
+                b = '7' + a[1:11]
+                del row['phone']
+                row['phone'] = b
                 writer.writerow(row)
 
 
@@ -22,9 +29,13 @@ def csv_reader(file):
         return data
 
 
+def main():
+    file = 'customers.csv'
+    csv_writer(csv_reader(file), 'auditorii.csv')
+
+
 if __name__ == "__main__":
-    file = 'samson.csv'
-    csv_writer(csv_reader(file), 'austria.csv')
-    # print(csv_reader(file))
+    main()
+
 
 
